@@ -1,0 +1,63 @@
+import { generateObject } from "ai";
+import { z } from "zod";
+import { google } from "@ai-sdk/google";
+import officialGrading from "./official-grading.md";
+import gradingSystemPrompt from "./grading-system-prompt.md";
+
+export const gradeMatura = async (text: string) => {
+  const { object } = await generateObject({
+    model: google("gemini-3-pro-preview"),
+    schema: z.object({
+      gradingResult: returnGradingSchema(),
+    }),
+    system: `${gradingSystemPrompt}\n${officialGrading}`,
+    prompt: "Oceń poniższe wypracowanie: " + text,
+  });
+  return object;
+};
+
+export function returnGradingSchema() {
+  return z.object({
+    totalScore: z.number().max(35).min(0),
+    criteria: z.object({
+      formalRequirements: z.object({
+        points: z.number().min(0).max(1),
+        reasons: z.object({
+          cardinalError: z.boolean(),
+          missingReading: z.boolean(),
+          irrelevant: z.boolean(),
+          notArgumentative: z.boolean(),
+        }),
+      }),
+      literaryCompetencies: z.object({
+        points: z.number().min(0).max(16),
+        factualErrors: z.number(),
+      }),
+      structure: z.object({
+        points: z.number().min(0).max(3),
+      }),
+      coherence: z.object({
+        points: z.number().min(0).max(3),
+        coherenceErrors: z.number(),
+      }),
+      style: z.object({
+        points: z.number().min(0).max(1),
+      }),
+      language: z.object({
+        points: z.number().min(0).max(7),
+        languageErrors: z.number(),
+      }),
+      spelling: z.object({
+        points: z.number().min(0).max(2),
+        spellingErrors: z.number(),
+      }),
+      punctuation: z.object({
+        points: z.number().min(0).max(2),
+        punctuationErrors: z.number(),
+      }),
+    }),
+    feedback: z.string(),
+    errors: z.array(z.string()),
+    suggestions: z.array(z.string()),
+  });
+}
