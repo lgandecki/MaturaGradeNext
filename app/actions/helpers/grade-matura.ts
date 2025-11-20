@@ -61,3 +61,5 @@ export function returnGradingSchema() {
     suggestions: z.array(z.string()),
   });
 }
+
+export type ServerGradingResult = z.infer<ReturnType<typeof returnGradingSchema>>;

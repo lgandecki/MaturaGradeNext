@@ -22,11 +22,14 @@ import {
   ChevronUp,
   Info,
 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
 import { Button } from "@/app/components/ui/button";
 import { Card } from "@/app/components/ui/card";
 import { Textarea } from "@/app/components/ui/textarea";
 import { useToast } from "@/app/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { gradeMaturaAction } from "./actions/grade-matura-action";
+import { serverGradingToUi } from "./serverGradingToUi";
 
 export const gradingResultSchema = z.object({
   totalScore: z.number(),
@@ -186,8 +189,8 @@ const GradingRow = ({
 };
 
 export default function Home() {
+  const { executeAsync, isExecuting } = useAction(gradeMaturaAction);
   const [text, setText] = useState("");
-  const [isGrading, setIsGrading] = useState(false);
   const [isWritingMode, setIsWritingMode] = useState(false);
   const [result, setResult] = useState<GradingResult | null>(null);
   const [copied, setCopied] = useState(false);
@@ -227,79 +230,19 @@ export default function Home() {
       return;
     }
 
-    if (isWritingMode) {
-      setIsWritingMode(false);
-    }
-
-    setIsGrading(true);
+    setIsWritingMode(false);
     setResult(null);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2500));
-
-    setResult({
-      totalScore: 35,
-      maxTotalScore: 50,
-      criteria: {
-        formalRequirements: {
-          points: 1,
-          reasons: {
-            cardinalError: false,
-            missingReading: false,
-            irrelevant: false,
-            notArgumentative: false,
-          },
-        },
-        literaryCompetencies: {
-          points: 11,
-          maxPoints: 16,
-          factualErrors: 1,
-        },
-        structure: {
-          points: 3,
-          maxPoints: 3,
-        },
-        coherence: {
-          points: 2,
-          maxPoints: 3,
-          coherenceErrors: 2,
-        },
-        style: {
-          points: 1,
-          maxPoints: 1,
-        },
-        language: {
-          points: 5,
-          maxPoints: 7,
-          languageErrors: 4,
-        },
-        spelling: {
-          points: 2,
-          maxPoints: 2,
-          spellingErrors: 0,
-        },
-        punctuation: {
-          points: 1,
-          maxPoints: 2,
-          punctuationErrors: 3,
-        },
-      },
-      feedback:
-        "Dobra praca z kilkoma błędami stylistycznymi. Argumentacja jest spójna, ale brakuje głębszego odwołania do literatury przedmiotu. Zwróć uwagę na interpunkcję w zdaniach wielokrotnie złożonych.",
-      errors: [
-        "Powtórzenie w akapicie 2: 'jest to'",
-        "Błąd interpunkcyjny w zdaniu podrzędnym",
-        "Zbyt potoczne sformułowanie: 'fajna sprawa'",
-        "Błąd rzeczowy: Wokulski nie był pozytywistą w pełnym tego słowa znaczeniu",
-      ],
-      suggestions: [
-        "Rozbuduj wstęp o kontekst historyczny",
-        "Użyj bardziej zróżnicowanego słownictwa (synonimy)",
-        "Dodaj cytat potwierdzający tezę z 'Lalki'",
-        "Przećwicz stosowanie przecinków przed spójnikami",
-      ],
-    });
-    setIsGrading(false);
+    const response = await executeAsync({ text });
+    if (response.data) {
+      setResult(serverGradingToUi(response.data.gradingResult));
+    } else if (response.serverError) {
+      toast({
+        title: "Błąd",
+        description: "Wystąpił błąd podczas oceny pracy.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleReset = () => {
@@ -453,7 +396,7 @@ export default function Home() {
 
           <div className="relative group rounded-xl overflow-hidden shadow-sm transition-shadow hover:shadow-md border border-border/60 bg-white">
             {/* Scanning Animation Overlay */}
-            {isGrading && (
+            {isExecuting && (
               <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden">
                 <motion.div
                   className="w-full h-1 bg-accent/50 shadow-[0_0_20px_2px_rgba(212,175,55,0.5)]"
@@ -538,13 +481,13 @@ export default function Home() {
             size="lg"
             className={`
               w-full text-lg h-14 font-serif mt-4 transition-all duration-300
-              ${isGrading ? "opacity-80" : "hover:translate-y-[-2px] shadow-lg hover:shadow-xl"}
+              ${isExecuting ? "opacity-80" : "hover:translate-y-[-2px] shadow-lg hover:shadow-xl"}
             `}
             onClick={handleGrade}
-            disabled={isGrading || !text}
+            disabled={isExecuting || !text}
             data-testid="button-grade"
           >
-            {isGrading ? (
+            {isExecuting ? (
               <span className="flex items-center gap-2">
                 <span className="w-2 h-2 bg-white rounded-full animate-bounce" />
                 <span className="w-2 h-2 bg-white rounded-full animate-bounce delay-75" />
