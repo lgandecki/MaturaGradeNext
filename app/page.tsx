@@ -274,8 +274,8 @@ export default function Home() {
           newProgress = 80 + ((elapsed - 180000) / 120000) * 20;
         }
 
-        if (newProgress >= 100) {
-          newProgress = 100;
+        if (newProgress >= 99) {
+          newProgress = 99;
           clearInterval(interval);
         }
         setProgress(newProgress);
