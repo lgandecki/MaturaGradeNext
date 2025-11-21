@@ -1,19 +1,33 @@
 import { generateObject } from "ai";
 import { z } from "zod";
-import { google } from "@ai-sdk/google";
-import officialGrading from "./official-grading.md";
-import gradingSystemPrompt from "./grading-system-prompt.md";
+import officialGrading from "./prompts/official-grading.md";
+import gradingSystemPrompt from "./prompts/grading-system-prompt.md";
+import guardialSystemPrompt from "./prompts/guardial-system-prompt.md";
+import { getCloudflareGatewayGoogleModel } from "./getCloudflareGatewayGoogleModel";
 
+const google = getCloudflareGatewayGoogleModel();
 export const gradeMatura = async (text: string) => {
-  const { object } = await generateObject({
+  const { object: check } = await generateObject({
     model: google("gemini-3-pro-preview"),
     schema: z.object({
-      gradingResult: returnGradingSchema(),
+      pass: z.boolean(),
     }),
-    system: `${gradingSystemPrompt}\n${officialGrading}`,
-    prompt: "Oceń poniższe wypracowanie: " + text,
+    system: guardialSystemPrompt,
+    prompt: text,
   });
-  return object;
+  if (check.pass) {
+    const { object } = await generateObject({
+      model: google("gemini-3-pro-preview"),
+      schema: z.object({
+        gradingResult: returnGradingSchema(),
+      }),
+      system: `${gradingSystemPrompt}\n${officialGrading}`,
+      prompt: "Oceń poniższe wypracowanie: " + text,
+    });
+    return object;
+  }
+
+  throw new Error("Invalid input");
 };
 
 export function returnGradingSchema() {
