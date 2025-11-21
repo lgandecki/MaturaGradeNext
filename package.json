@@ -12,6 +12,8 @@
   "dependencies": {
     "@ai-sdk/google": "^2.0.39",
     "@ai-sdk/openai": "^2.0.69",
+    "@arcjet/inspect": "^1.0.0-beta.15",
+    "@arcjet/next": "^1.0.0-beta.15",
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",
     "@neondatabase/serverless": "^0.10.4",
