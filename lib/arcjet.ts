@@ -15,8 +15,8 @@ export const aj = arcjet({
       mode: "LIVE",
       characteristics: ["ip.src"],
       refillRate: 5,
-      interval: 120, // Refill 5 requests every 120 seconds
-      capacity: 5, // Allow a burst of 5 requests
+      interval: parseInt(process.env.ARCJET_RATE_LIMIT_INTERVAL || "120"),
+      capacity: parseInt(process.env.ARCJET_RATE_LIMIT_CAPACITY || "5"),
     }),
   ],
 });
