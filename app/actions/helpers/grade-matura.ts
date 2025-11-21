@@ -8,7 +8,7 @@ import { getCloudflareGatewayGoogleModel } from "./getCloudflareGatewayGoogleMod
 const google = getCloudflareGatewayGoogleModel();
 export const gradeMatura = async (text: string) => {
   const { object: check } = await generateObject({
-    model: google("gemini-3-pro-preview"),
+    model: google("gemini-2.5-flash-lite"),
     schema: z.object({
       pass: z.boolean(),
     }),
