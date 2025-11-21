@@ -8,9 +8,11 @@ cost-effective AI applications using the modern React ecosystem. It demonstrates
 type-safe server actions, and intermediate AI gateways for observability and billing control, all powered by the **Bun**
 runtime.
 
-<img width="820" alt="Create Next App" src="https://github.com/user-attachments/assets/49c649bf-2d1e-479d-b2cf-25b40576bc90" />
-
-<img width="820" alt="CleanShot 2025-11-21 at 19 16 32@2x" src="https://github.com/user-attachments/assets/6967abac-57cf-4e93-92aa-19cc6730c543" />
+<p align="center">
+  <img width="820" alt="Create Next App" src="https://github.com/user-attachments/assets/49c649bf-2d1e-479d-b2cf-25b40576bc90" />
+  <br/>
+  <img width="820" alt="CleanShot 2025-11-21 at 19 16 32@2x" src="https://github.com/user-attachments/assets/6967abac-57cf-4e93-92aa-19cc6730c543" />
+</p>
 
 ## 🌟 Technical Showcase Features
 
