@@ -35,7 +35,6 @@ export default function About() {
           </p>
 
           <div className="bg-secondary/20 p-6 rounded-xl border border-secondary">
-            <h2 className="text-xl font-serif font-medium mb-4">Twórca</h2>
             <p className="text-lg font-medium mb-2">Made by Łukasz Gandecki</p>
 
             <div className="flex flex-wrap gap-4 mt-6">

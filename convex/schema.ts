@@ -6,6 +6,10 @@ export default defineSchema({
     // Input
     text: v.string(),
 
+    // Ownership
+    sessionId: v.optional(v.string()), // UUID for anonymous users
+    userId: v.optional(v.id("users")), // For logged-in users
+
     // Status
     status: v.union(
       v.literal("pending"),
@@ -63,5 +67,7 @@ export default defineSchema({
         suggestions: v.array(v.string()),
       })
     ),
-  }),
+  })
+    .index("by_sessionId", ["sessionId"])
+    .index("by_userId", ["userId"]),
 });

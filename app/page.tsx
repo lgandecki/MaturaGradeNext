@@ -19,11 +19,10 @@ import {
   Copy,
   Check,
   Maximize2,
-  Minimize2,
   ArrowLeft,
   Sparkles,
   ChevronDown,
-  ChevronUp,
+  History,
   Info,
 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
@@ -194,11 +193,28 @@ const GradingRow = ({
   );
 };
 
+// Get or create sessionId from localStorage
+const getSessionId = (): string => {
+  if (typeof window === "undefined") return "";
+  let id = localStorage.getItem("sessionId");
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem("sessionId", id);
+  }
+  return id;
+};
+
 export default function Home() {
   const { executeAsync, isExecuting } = useAction(gradeMaturaAction);
   const searchParams = useSearchParams();
   const router = useRouter();
   const submissionId = searchParams.get("submission") as Id<"submissions"> | null;
+  const [sessionId, setSessionId] = useState<string>("");
+
+  // Initialize sessionId on mount
+  useEffect(() => {
+    setSessionId(getSessionId());
+  }, []);
 
   // Subscribe to submission if ID exists in URL
   const submission = useQuery(api.submissions.get, submissionId ? { id: submissionId } : "skip");
@@ -251,11 +267,20 @@ export default function Home() {
       return;
     }
 
+    if (!sessionId) {
+      toast({
+        title: "Błąd",
+        description: "Nie można zidentyfikować sesji. Odśwież stronę.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsWritingMode(false);
     setProgress(0);
     setResult(null);
 
-    const response = await executeAsync({ text });
+    const response = await executeAsync({ text, sessionId });
     if (response?.data?.submissionId) {
       // Update URL with submission ID (no page reload)
       router.replace(`/?submission=${response.data.submissionId}`, { scroll: false });
@@ -471,15 +496,27 @@ export default function Home() {
             <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">AI Assistant</p>
           </div>
         </div>
-        <Link href="/about">
-          <Button
-            variant="ghost"
-            className="font-serif italic hover:bg-transparent hover:text-accent transition-colors"
-            data-testid="button-about"
-          >
-            O projekcie
-          </Button>
-        </Link>
+        <div className="flex gap-4">
+          <Link href="/history">
+            <Button
+              variant="ghost"
+              className="font-serif italic hover:bg-transparent hover:text-accent transition-colors hidden sm:flex"
+              data-testid="button-history"
+            >
+              <History className="mr-2 h-4 w-4" />
+              Historia
+            </Button>
+          </Link>
+          <Link href="/about">
+            <Button
+              variant="ghost"
+              className="font-serif italic hover:bg-transparent hover:text-accent transition-colors"
+              data-testid="button-about"
+            >
+              O projekcie
+            </Button>
+          </Link>
+        </div>
       </header>
 
       <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
