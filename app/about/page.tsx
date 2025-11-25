@@ -29,7 +29,7 @@ export default function About() {
           <div className="w-16 h-1 bg-accent mb-6" />
 
           <p className="text-lg text-muted-foreground leading-relaxed mb-8 font-serif">
-            MaturaGrader to narzędzie wspomagane sztuczną inteligencją, stworzone, aby pomóc maturzystom w
+            &quot;Z Polaka&quot; to narzędzie wspomagane sztuczną inteligencją, stworzone, aby pomóc maturzystom w
             przygotowaniach do egzaminu dojrzałości. Naszym celem jest zapewnienie szybkiej, rzetelnej i konstruktywnej
             informacji zwrotnej.
           </p>
@@ -59,7 +59,7 @@ export default function About() {
                 <span>LinkedIn</span>
               </a>
 
-              <a
+              {/* <a
                 href="https://youtube.com/@lgandecki"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -67,7 +67,7 @@ export default function About() {
               >
                 <Youtube size={18} />
                 <span>YouTube</span>
-              </a>
+              </a> */}
 
               <a
                 href="https://lgandecki.net"
@@ -83,7 +83,7 @@ export default function About() {
         </div>
 
         <div className="text-center text-sm text-muted-foreground/60 font-serif italic">
-          &copy; {new Date().getFullYear()} MaturaGrader. Wszystkie prawa zastrzeżone.
+          &copy; {new Date().getFullYear()} Z Polaka. Wszystkie prawa zastrzeżone.
         </div>
       </Card>
     </div>
