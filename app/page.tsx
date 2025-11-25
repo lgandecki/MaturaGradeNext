@@ -1,9 +1,13 @@
 "use client";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { z } from "zod";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import {
   Upload,
   FileText,
@@ -191,7 +195,20 @@ const GradingRow = ({
 };
 
 export default function Home() {
-  const { executeAsync, isExecuting: isGrading } = useAction(gradeMaturaAction);
+  const { executeAsync, isExecuting } = useAction(gradeMaturaAction);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const submissionId = searchParams.get("submission") as Id<"submissions"> | null;
+
+  // Subscribe to submission if ID exists in URL
+  const submission = useQuery(api.submissions.get, submissionId ? { id: submissionId } : "skip");
+
+  // Derive isGrading from submission status
+  const isGrading = useMemo(() => {
+    if (!submission) return false;
+    return submission.status === "pending" || submission.status === "processing";
+  }, [submission]);
+
   const [text, setText] = useState("");
   const [isWritingMode, setIsWritingMode] = useState(false);
   const [result, setResult] = useState<GradingResult | null>(null);
@@ -238,17 +255,11 @@ export default function Home() {
     setProgress(0);
     setResult(null);
 
-    // ✅ FIX: Calculate and set ETA here, before the async action starts
-    const startTime = Date.now();
-    const duration = 5 * 60 * 1000; // 5 minutes
-    const eta = new Date(startTime + duration);
-    setEstimatedTime(eta.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
-
     const response = await executeAsync({ text });
-    if (response.data) {
-      setResult(serverGradingToUi(response.data.gradingResult));
-      setProgress(100);
-    } else if (response.serverError) {
+    if (response?.data?.submissionId) {
+      // Update URL with submission ID (no page reload)
+      router.replace(`/?submission=${response.data.submissionId}`, { scroll: false });
+    } else if (response?.serverError) {
       toast({
         title: "Błąd",
         description: "Wystąpił błąd podczas oceny pracy.",
@@ -257,36 +268,67 @@ export default function Home() {
     }
   };
 
+  // Calculate progress from submission createdAt (works on reload)
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isGrading) {
-      const startTime = Date.now();
+    if (!isGrading || !submission?.createdAt) return;
 
-      interval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        let newProgress = 0;
+    // Calculate and set ETA
+    const duration = 5 * 60 * 1000; // 5 minutes
+    const eta = new Date(submission.createdAt + duration);
+    setEstimatedTime(eta.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
 
-        // 0 to 80% in first 3 minutes (180000ms)
-        if (elapsed < 180000) {
-          newProgress = (elapsed / 180000) * 80;
-        } else {
-          // 80 to 100% in last 2 minutes (120000ms)
-          newProgress = 80 + ((elapsed - 180000) / 120000) * 20;
-        }
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - submission.createdAt;
+      let newProgress = 0;
 
-        if (newProgress >= 99) {
-          newProgress = 99;
-          clearInterval(interval);
-        }
-        setProgress(newProgress);
-      }, 100);
-    }
+      // 0 to 80% in first 3 minutes (180000ms)
+      if (elapsed < 180000) {
+        newProgress = (elapsed / 180000) * 80;
+      } else {
+        // 80 to 100% in last 2 minutes (120000ms)
+        newProgress = 80 + ((elapsed - 180000) / 120000) * 20;
+      }
+
+      if (newProgress >= 99) {
+        newProgress = 99;
+        clearInterval(interval);
+      }
+      setProgress(newProgress);
+    }, 100);
+
     return () => clearInterval(interval);
-  }, [isGrading]);
+  }, [isGrading, submission?.createdAt]);
+
+  // Handle submission completion or failure
+  useEffect(() => {
+    if (!submission) return;
+
+    if (submission.status === "completed" && submission.result) {
+      setResult(serverGradingToUi(submission.result));
+      setProgress(100);
+      if (!text || text.trim() === "") {
+        setText(submission.text);
+      }
+    }
+
+    if (submission.status === "failed") {
+      toast({
+        title: "Błąd",
+        description: submission.error || "Wystąpił błąd podczas oceny pracy.",
+        variant: "destructive",
+      });
+      // Clear URL
+      router.replace("/", { scroll: false });
+    }
+  }, [submission?.status, submission?.result, submission?.error, router, toast]);
 
   const handleReset = () => {
     setText("");
     setResult(null);
+    // Clear submission from URL if present
+    if (submissionId) {
+      router.replace("/", { scroll: false });
+    }
   };
 
   const handleShare = () => {
@@ -311,7 +353,7 @@ export default function Home() {
       {/* Background decoration */}
       <div className="fixed inset-0 pointer-events-none opacity-30 z-[-1] bg-[radial-gradient(circle_at_50%_120%,rgba(212,175,55,0.15),transparent_50%)]" />
 
-      <Dialog open={isGrading} onOpenChange={() => {}}>
+      <Dialog open={isExecuting || isGrading} onOpenChange={() => {}}>
         <DialogContent
           className="sm:max-w-md"
           onPointerDownOutside={(e) => e.preventDefault()}
@@ -546,13 +588,13 @@ export default function Home() {
               size="lg"
               className={`
               w-full text-lg h-14 font-serif mt-4 transition-all duration-300
-              ${isGrading ? "opacity-80 cursor-not-allowed" : "hover:translate-y-[-2px] shadow-lg hover:shadow-xl"}
+              ${isExecuting || isGrading ? "opacity-80 cursor-not-allowed" : "hover:translate-y-[-2px] shadow-lg hover:shadow-xl"}
             `}
               onClick={handleGrade}
-              disabled={isGrading || !text}
+              disabled={isExecuting || isGrading || !text}
               data-testid="button-grade"
             >
-              {isGrading ? (
+              {isExecuting || isGrading ? (
                 <span className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-white rounded-full animate-bounce" />
                   <span className="w-2 h-2 bg-white rounded-full animate-bounce delay-75" />
