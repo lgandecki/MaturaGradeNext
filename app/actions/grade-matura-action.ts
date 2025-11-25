@@ -5,15 +5,18 @@ import { after } from "next/server";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import { gradeMatura } from "./helpers/grade-matura";
+import { getOrCreateSessionId } from "@/lib/session";
 
 const inputSchema = z.object({
   text: z.string().min(200).max(10000),
-  sessionId: z.string().uuid(),
+  sessionId: z.string().uuid().optional(),
 });
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
-export const gradeMaturaAction = actionClient.inputSchema(inputSchema).action(async ({ parsedInput: { text, sessionId } }) => {
+export const gradeMaturaAction = actionClient.inputSchema(inputSchema).action(async ({ parsedInput: { text, sessionId: inputSessionId } }) => {
+  // Get sessionId from input or create new one (Server Action can set cookies)
+  const sessionId = inputSessionId || await getOrCreateSessionId();
   // 1. Create submission in Convex immediately
   const submissionId = await convex.mutation(api.submissions.create, { text, sessionId });
 
