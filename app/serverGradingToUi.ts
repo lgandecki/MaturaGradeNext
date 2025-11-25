@@ -1,5 +1,5 @@
 import { ServerGradingResult } from "./actions/helpers/grade-matura";
-import { GradingResult } from "./page";
+import { GradingResult } from "./HomeClient";
 
 export const serverGradingToUi = (serverData: ServerGradingResult): GradingResult => ({
   totalScore: serverData.totalScore,
