@@ -17,7 +17,7 @@ export const gradeMatura = async (text: string) => {
   });
   if (check.pass) {
     const { object } = await generateObject({
-      model: google("gemini-3-pro-preview"),
+      model: google("gemini-2.5-flash-lite"),
       schema: z.object({
         gradingResult: returnGradingSchema(),
       }),
