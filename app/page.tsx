@@ -425,7 +425,7 @@ export default function Home() {
             <PenTool size={24} strokeWidth={1.5} />
           </div>
           <div>
-            <h1 className="text-2xl font-serif font-bold tracking-tight text-primary">MaturaGrader</h1>
+            <h1 className="text-2xl font-serif font-bold tracking-tight text-primary">Z Polaka</h1>
             <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">AI Assistant</p>
           </div>
         </div>
@@ -445,7 +445,10 @@ export default function Home() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col gap-4 relative z-0"
+          className={cn(
+            "flex flex-col gap-4 relative z-0",
+            result && "lg:sticky lg:top-8 lg:self-start lg:h-[calc(100vh-4rem)]"
+          )}
         >
           <div className="flex justify-between items-center px-1">
             <h2 className="text-xl font-serif font-medium flex items-center gap-2">
@@ -468,7 +471,7 @@ export default function Home() {
             )}
           </div>
 
-          <div className="relative group rounded-xl overflow-hidden shadow-sm transition-shadow hover:shadow-md border border-border/60 bg-white">
+          <div className="relative group rounded-xl overflow-hidden shadow-sm transition-shadow hover:shadow-md border border-border/60 bg-white flex-1">
             {!text ? (
               <div
                 {...getRootProps()}
@@ -507,7 +510,7 @@ export default function Home() {
                 </Button>
               </div>
             ) : (
-              <div className="relative h-[600px]">
+              <div className={cn("relative", result ? "h-full" : "h-[600px]")}>
                 <div className="absolute top-2 right-2 z-10">
                   <Button
                     variant="ghost"
@@ -538,27 +541,29 @@ export default function Home() {
             )}
           </div>
 
-          <Button
-            size="lg"
-            className={`
+          {result ? null : (
+            <Button
+              size="lg"
+              className={`
               w-full text-lg h-14 font-serif mt-4 transition-all duration-300
               ${isGrading ? "opacity-80 cursor-not-allowed" : "hover:translate-y-[-2px] shadow-lg hover:shadow-xl"}
             `}
-            onClick={handleGrade}
-            disabled={isGrading || !text}
-            data-testid="button-grade"
-          >
-            {isGrading ? (
-              <span className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-white rounded-full animate-bounce" />
-                <span className="w-2 h-2 bg-white rounded-full animate-bounce delay-75" />
-                <span className="w-2 h-2 bg-white rounded-full animate-bounce delay-150" />
-                Analizowanie
-              </span>
-            ) : (
-              "Oceń pracę"
-            )}
-          </Button>
+              onClick={handleGrade}
+              disabled={isGrading || !text}
+              data-testid="button-grade"
+            >
+              {isGrading ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-white rounded-full animate-bounce" />
+                  <span className="w-2 h-2 bg-white rounded-full animate-bounce delay-75" />
+                  <span className="w-2 h-2 bg-white rounded-full animate-bounce delay-150" />
+                  Analizowanie
+                </span>
+              ) : (
+                "Oceń pracę"
+              )}
+            </Button>
+          )}
         </motion.div>
 
         {/* Results Section */}
@@ -748,7 +753,7 @@ export default function Home() {
                       className="text-primary/80 italic leading-relaxed border-l-4 border-accent/40 pl-6 py-2 bg-accent/5 rounded-r-lg"
                       data-testid="text-feedback"
                     >
-                      "{result.feedback}"
+                      &ldquo;{result.feedback}&rdquo;
                     </p>
                   </div>
 

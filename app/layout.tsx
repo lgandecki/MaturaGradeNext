@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "zpolaka.pl",
+  title: "Matura z Polaka",
   description: "Automatyczna ocena pracy maturalnej z polskiego przez sztuczną inteligencję",
 };
 
