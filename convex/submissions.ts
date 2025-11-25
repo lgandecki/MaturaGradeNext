@@ -4,10 +4,12 @@ import { mutation, query } from "./_generated/server";
 export const create = mutation({
   args: {
     text: v.string(),
+    sessionId: v.string(),
   },
   handler: async (ctx, args) => {
     const submissionId = await ctx.db.insert("submissions", {
       text: args.text,
+      sessionId: args.sessionId,
       status: "pending",
       createdAt: Date.now(),
     });
@@ -102,5 +104,46 @@ export const fail = mutation({
       error: args.error,
       completedAt: Date.now(),
     });
+  },
+});
+
+export const getBySession = query({
+  args: { sessionId: v.string() },
+  handler: async (ctx, { sessionId }) => {
+    return ctx.db
+      .query("submissions")
+      .withIndex("by_sessionId", (q) => q.eq("sessionId", sessionId))
+      .order("desc")
+      .collect();
+  },
+});
+
+export const getByUser = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    return ctx.db
+      .query("submissions")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .order("desc")
+      .collect();
+  },
+});
+
+export const claimSubmissions = mutation({
+  args: {
+    sessionId: v.string(),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, { sessionId, userId }) => {
+    const submissions = await ctx.db
+      .query("submissions")
+      .withIndex("by_sessionId", (q) => q.eq("sessionId", sessionId))
+      .collect();
+
+    for (const submission of submissions) {
+      await ctx.db.patch(submission._id, { userId });
+    }
+
+    return submissions.length;
   },
 });
