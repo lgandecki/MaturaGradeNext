@@ -595,10 +595,57 @@ function HomeClientContent({
             </Button>
           </Link>
           <Authenticated>
-            <UserButton />
+            <UserButton
+              appearance={{
+                elements: {
+                  userButtonTrigger: {
+                    outline: "none",
+                    boxShadow: "none",
+                    border: "none",
+                    "&:focus": {
+                      outline: "none",
+                      boxShadow: "none",
+                    },
+                    "&:focus-visible": {
+                      outline: "none",
+                      boxShadow: "none",
+                    },
+                    "&:active": {
+                      outline: "none",
+                      boxShadow: "none",
+                    },
+                  },
+                  avatarBox: {
+                    outline: "none",
+                    boxShadow: "none",
+                    border: "none",
+                  },
+                  userButtonAvatarBox: {
+                    outline: "none",
+                    boxShadow: "none",
+                    border: "none",
+                  },
+                  userButtonPopoverCard: {
+                    outline: "none",
+                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                  },
+                  rootBox: {
+                    outline: "none",
+                    boxShadow: "none",
+                  },
+                },
+              }}
+            />
           </Authenticated>
           <Unauthenticated>
-            <SignInButton />
+            <SignInButton>
+              <Button
+                variant="ghost"
+                className="font-serif italic hover:bg-transparent hover:text-accent transition-colors"
+              >
+                Zaloguj się
+              </Button>
+            </SignInButton>
           </Unauthenticated>
         </div>
       </header>
