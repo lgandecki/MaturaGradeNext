@@ -6,8 +6,11 @@ import { SignInButton, SignOutButton, UserButton } from "@clerk/nextjs";
 import { PenTool, History, Info, Menu, LogOut, User } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/app/components/ui/sheet";
+import { STRINGS, Lang } from "@/lib/strings";
 
 export function Header() {
+  const lang: Lang = (process.env.NEXT_PUBLIC_DEMO_LANG as Lang) === "en" ? "en" : "pl";
+
   return (
     <header className="w-full flex justify-between items-center mb-12 mt-4 z-10">
       <Link href="/" className="flex items-center gap-3">
@@ -15,7 +18,7 @@ export function Header() {
           <PenTool size={24} strokeWidth={1.5} />
         </div>
         <div>
-          <h1 className="text-2xl font-serif font-bold tracking-tight text-primary">Z Polaka</h1>
+          <h1 className="text-2xl font-serif font-bold tracking-tight text-primary">{STRINGS.mainTitle[lang]}</h1>
           <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">AI Assistant</p>
         </div>
       </Link>
@@ -29,7 +32,7 @@ export function Header() {
             data-testid="button-history"
           >
             <History className="mr-2 h-4 w-4" />
-            Historia
+            {STRINGS.navHistory[lang]}
           </Button>
         </Link>
         <Link href="/about">
@@ -38,7 +41,7 @@ export function Header() {
             className="font-serif italic hover:bg-transparent hover:text-accent transition-colors"
             data-testid="button-about"
           >
-            O projekcie
+            {STRINGS.navAbout[lang]}
           </Button>
         </Link>
         <div className="w-[100px] flex justify-center items-center">
@@ -94,7 +97,7 @@ export function Header() {
                   variant="ghost"
                   className="font-serif italic hover:bg-transparent hover:text-accent transition-colors"
                 >
-                  Zaloguj się
+                  {STRINGS.authSignIn[lang]}
                 </Button>
               </SignInButton>
             </div>
@@ -104,7 +107,7 @@ export function Header() {
               variant="ghost"
               className="font-serif italic hover:bg-transparent hover:text-accent transition-colors"
             >
-              Autoryzacja...
+              {STRINGS.authAuthorizing[lang]}
             </Button>
           </AuthLoading>
         </div>
@@ -130,7 +133,7 @@ export function Header() {
                     className="w-full justify-start font-serif italic hover:bg-transparent hover:text-accent transition-colors"
                   >
                     <History className="mr-2 h-4 w-4" />
-                    Historia
+                    {STRINGS.navHistory[lang]}
                   </Button>
                 </Link>
               </SheetClose>
@@ -140,7 +143,7 @@ export function Header() {
                     variant="ghost"
                     className="w-full justify-start font-serif italic hover:bg-transparent hover:text-accent transition-colors"
                   >
-                    <Info className="mr-2 h-4 w-4" />O projekcie
+                    <Info className="mr-2 h-4 w-4" />{STRINGS.navAbout[lang]}
                   </Button>
                 </Link>
               </SheetClose>
@@ -154,7 +157,7 @@ export function Header() {
                         className="w-full justify-start font-serif italic hover:bg-transparent hover:text-accent transition-colors"
                       >
                         <User className="mr-2 h-4 w-4" />
-                        Moje konto
+                        {STRINGS.navAccount[lang]}
                       </Button>
                     </Link>
                   </SheetClose>
@@ -164,7 +167,7 @@ export function Header() {
                       className="w-full justify-start font-serif italic hover:bg-transparent hover:text-accent transition-colors text-muted-foreground"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
-                      Wyloguj się
+                      {STRINGS.authSignOut[lang]}
                     </Button>
                   </SignOutButton>
                 </div>
@@ -176,7 +179,7 @@ export function Header() {
                       variant="ghost"
                       className="w-full justify-start font-serif italic hover:bg-transparent hover:text-accent transition-colors"
                     >
-                      Zaloguj się
+                      {STRINGS.authSignIn[lang]}
                     </Button>
                   </SignInButton>
                 </div>

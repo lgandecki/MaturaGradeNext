@@ -36,6 +36,7 @@ import { GradingResult } from "../gradingResultSchema";
 import { Id } from "@/convex/_generated/dataModel";
 import { api } from "@/convex/_generated/api";
 import { FunctionReturnType } from "convex/server";
+import { STRINGS, Lang } from "@/lib/strings";
 
 export const ErrorCountBox = ({ label, count }: { label: string; count: number }) => {
   const isError = count > 0;
@@ -155,6 +156,7 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
   const { executeAsync } = useAction(gradeMaturaAction);
   const router = useRouter();
   const { isSignedIn, isLoaded: isAuthLoaded } = useUser();
+  const lang: Lang = (process.env.NEXT_PUBLIC_DEMO_LANG as Lang) === "en" ? "en" : "pl";
 
   // Derive isGrading from submission status
   const isGrading = useMemo(() => {
@@ -187,14 +189,14 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
           const content = reader.result as string;
           setText(content);
           toast({
-            title: "Dokument wczytany",
-            description: `Wczytano ${file.name}`,
+            title: STRINGS.toastLoadedTitle[lang],
+            description: `${STRINGS.toastLoadedDesc[lang]} ${file.name}`,
           });
         };
         reader.readAsText(file);
       }
     },
-    [toast]
+    [toast, lang]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -205,8 +207,8 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
   const handleGrade = async () => {
     if (!text.trim()) {
       toast({
-        title: "Pusty dokument",
-        description: "Wpisz tekst lub wgraj plik, aby ocenić pracę.",
+        title: STRINGS.toastEmptyTitle[lang],
+        description: STRINGS.toastEmptyDesc[lang],
         variant: "destructive",
       });
       return;
@@ -226,8 +228,8 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
       setIsSubmitting(false);
       if (response?.serverError) {
         toast({
-          title: "Błąd",
-          description: "Wystąpił błąd podczas oceny pracy.",
+          title: STRINGS.toastErrorTitle[lang],
+          description: STRINGS.toastErrorDesc[lang],
           variant: "destructive",
         });
       }
@@ -283,13 +285,13 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
 
     if (submission.status === "failed") {
       toast({
-        title: "Błąd",
-        description: submission.error || "Wystąpił błąd podczas oceny pracy.",
+        title: STRINGS.toastErrorTitle[lang],
+        description: submission.error || STRINGS.toastErrorDesc[lang],
         variant: "destructive",
       });
       onReset();
     }
-  }, [submission?.status, submission?.result, submission?.error, submission?.text, toast, text, onReset]);
+  }, [submission?.status, submission?.result, submission?.error, submission?.text, toast, text, onReset, lang]);
 
   // Close sign-up tracking when user signs in
   useEffect(() => {
@@ -306,12 +308,14 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
 
   const handleShare = () => {
     setCopied(true);
-    navigator.clipboard.writeText(
-      `Uzyskałem ${result?.totalScore}/${result?.maxTotalScore} punktów z mojej pracy maturalnej! Sprawdź swoją na MaturaGrader.`
-    );
+    const msg = STRINGS.shareMessage[lang]
+      .replace("{score}", result?.totalScore.toString() ?? "0")
+      .replace("{max}", result?.maxTotalScore.toString() ?? "0");
+
+    navigator.clipboard.writeText(msg);
     toast({
-      title: "Skopiowano do schowka",
-      description: "Link do wyniku został skopiowany.",
+      title: STRINGS.toastCopyTitle[lang],
+      description: STRINGS.toastCopyDesc[lang],
     });
     setTimeout(() => setCopied(false), 2000);
   };
@@ -335,16 +339,16 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="text-accent h-5 w-5" />
-              Analizowanie Twojej pracy
+              {STRINGS.dialogAnalyzingTitle[lang]}
             </DialogTitle>
             <DialogDescription className="pt-2">
-              Nasz system AI dokładnie weryfikuje Twoją pracę pod kątem wszystkich kryteriów maturalnych.
+              {STRINGS.dialogAnalyzingDesc[lang]}
             </DialogDescription>
           </DialogHeader>
           <div className="py-6 space-y-6">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Postęp analizy</span>
+                <span className="text-muted-foreground">{STRINGS.dialogProgress[lang]}</span>
                 <span className="font-medium">{Math.round(progress)}%</span>
               </div>
               <Progress value={progress} className="h-2" />
@@ -353,26 +357,31 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
             <div className="bg-secondary/30 rounded-lg p-4 text-sm text-muted-foreground flex items-start gap-3">
               <Info className="h-5 w-5 shrink-0 text-primary/60 mt-0.5" />
               <div className="space-y-1">
-                <p className="font-medium text-primary/80">Szacowany czas zakończenia: {estimatedTime}</p>
-                <p className="text-xs">Prosimy o cierpliwość. Dokładna analiza wymaga czasu.</p>
+                <p className="font-medium text-primary/80">{STRINGS.dialogEstimatedTime[lang]} {estimatedTime}</p>
+                <p className="text-xs">{STRINGS.dialogPatience[lang]}</p>
               </div>
             </div>
 
-            {isAuthLoaded && !isSignedIn && (
+            {isAuthLoaded && !isSignedIn && submission && (
               <div className="bg-accent/10 rounded-lg p-4 text-sm flex items-start gap-3 border border-accent/20">
                 <User className="h-5 w-5 shrink-0 text-accent mt-0.5" />
                 <div className="space-y-2">
-                  <p className="font-medium text-primary/80">Załóż konto, aby zapisać wyniki</p>
+                  <p className="font-medium text-primary/80">{STRINGS.dialogSignUpTitle[lang]}</p>
                   <p className="text-xs text-muted-foreground">
-                    Po rejestracji będziesz mieć dostęp do historii swoich prac z dowolnego urządzenia.
+                    {STRINGS.dialogSignUpDesc[lang]}
                   </p>
                   <SignUpButton
                     mode="modal"
-                    forceRedirectUrl={submission ? `/submission/${submission._id}` : "/"}
-                    fallbackRedirectUrl={submission ? `/submission/${submission._id}` : "/"}
+                    forceRedirectUrl={`/submission/${submission._id}`}
+                    signInForceRedirectUrl={`/submission/${submission._id}`}
                   >
-                    <Button size="sm" variant="outline" className="mt-1" onClick={() => setIsSignUpOpen(true)}>
-                      Załóż konto
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="mt-1"
+                      onClick={() => setIsSignUpOpen(true)}
+                    >
+                      {STRINGS.dialogSignUpButton[lang]}
                     </Button>
                   </SignUpButton>
                 </div>
@@ -398,12 +407,12 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
                 onClick={() => setIsWritingMode(false)}
                 className="text-muted-foreground hover:text-primary gap-2 hover:bg-white/50"
               >
-                <ArrowLeft size={18} /> Wróć
+                <ArrowLeft size={18} /> {STRINGS.writingBack[lang]}
               </Button>
 
               <div className="flex items-center gap-2 text-sm text-muted-foreground font-serif italic px-4 py-1 bg-white/50 rounded-full backdrop-blur-sm border border-border/20 shadow-sm">
                 <PenTool size={14} />
-                Tryb skupienia
+                {STRINGS.writingFocus[lang]}
               </div>
 
               <Button
@@ -411,7 +420,7 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
                 className="bg-primary text-white hover:bg-primary/90 gap-2 shadow-md hover:shadow-lg transition-all"
               >
                 <Sparkles size={16} />
-                Oceń pracę
+                {STRINGS.writingGrade[lang]}
               </Button>
             </div>
 
@@ -428,7 +437,7 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
                 <Textarea
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  placeholder="Rozpocznij pisanie swojej rozprawki..."
+                  placeholder={STRINGS.writingPlaceholder[lang]}
                   className="w-full h-full min-h-[85vh] resize-none py-12 px-8 md:px-16 text-lg md:text-xl leading-[24px] font-serif bg-transparent border-none focus:ring-0 focus:outline-none text-primary placeholder:text-muted-foreground/30 relative z-10"
                   spellCheck={false}
                   autoFocus
@@ -438,10 +447,10 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
 
             <div className="fixed bottom-6 right-6 md:right-12 z-10">
               <div className="bg-white/80 backdrop-blur-md border border-border shadow-lg rounded-full px-4 py-2 text-xs md:text-sm text-muted-foreground flex gap-4 items-center">
-                <span>Zapisano: {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                <span>{STRINGS.writingSaved[lang]} {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                 <div className="w-px h-3 bg-border" />
                 <span className="font-medium text-primary">
-                  {text.split(/\s+/).filter((w) => w.length > 0).length} słów
+                  {text.split(/\s+/).filter((w) => w.length > 0).length} {STRINGS.writingWords[lang]}
                 </span>
               </div>
             </div>
@@ -466,7 +475,7 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
               <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-sans">
                 1
               </span>
-              Twoja praca
+              {STRINGS.inputTitle[lang]}
             </h2>
             {text && (
               <Button
@@ -477,7 +486,7 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
                 data-testid="button-reset"
               >
                 <RefreshCcw size={14} className="mr-2" />
-                Wyczyść
+                {STRINGS.inputReset[lang]}
               </Button>
             )}
           </div>
@@ -501,11 +510,11 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
                 >
                   <Upload size={32} strokeWidth={1.5} />
                 </div>
-                <h3 className="text-2xl font-serif font-medium mb-3 text-primary">Upuść plik tutaj</h3>
+                <h3 className="text-2xl font-serif font-medium mb-3 text-primary">{STRINGS.dropzoneDrop[lang]}</h3>
                 <p className="text-muted-foreground max-w-xs text-sm leading-relaxed mb-8">
-                  Obsługujemy pliki tekstowe (.txt, .md).
+                  {STRINGS.dropzoneFormats[lang]}
                   <br />
-                  Możesz też wpisać tekst ręcznie.
+                  {STRINGS.dropzoneManual[lang]}
                 </p>
                 <Button
                   variant="outline"
@@ -517,7 +526,7 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
                   data-testid="button-manual-write"
                 >
                   <FileText className="mr-2 h-4 w-4" />
-                  Napisz ręcznie
+                  {STRINGS.buttonManual[lang]}
                 </Button>
               </div>
             ) : (
@@ -528,7 +537,7 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
                     size="icon"
                     className="text-muted-foreground hover:text-primary bg-white/50 backdrop-blur-sm"
                     onClick={enterWritingMode}
-                    title="Pełny ekran"
+                    title={STRINGS.writingFocus[lang]}
                     data-testid="button-expand"
                   >
                     <Maximize2 size={18} />
@@ -537,7 +546,7 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
                 <Textarea
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  placeholder="Zacznij pisać swoją rozprawkę tutaj..."
+                  placeholder={STRINGS.textareaPlaceholder[lang]}
                   className="h-full resize-none p-8 text-lg leading-relaxed font-serif bg-transparent border-none focus:ring-0 focus:outline-none text-primary/90"
                   spellCheck={false}
                   data-testid="textarea-content"
@@ -546,7 +555,7 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
                   className="absolute bottom-4 right-4 text-xs font-medium text-muted-foreground/80 bg-secondary/50 px-3 py-1.5 rounded-full backdrop-blur-sm"
                   data-testid="text-word-count"
                 >
-                  {text.split(/\s+/).filter((w) => w.length > 0).length} słów
+                  {text.split(/\s+/).filter((w) => w.length > 0).length} {STRINGS.writingWords[lang]}
                 </div>
               </div>
             )}
@@ -568,10 +577,10 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
                   <span className="w-2 h-2 bg-white rounded-full animate-bounce" />
                   <span className="w-2 h-2 bg-white rounded-full animate-bounce delay-75" />
                   <span className="w-2 h-2 bg-white rounded-full animate-bounce delay-150" />
-                  Analizowanie
+                  {STRINGS.buttonAnalyzing[lang]}
                 </span>
               ) : (
-                "Oceń pracę"
+                STRINGS.writingGrade[lang]
               )}
             </Button>
           )}
@@ -584,7 +593,7 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
               <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-sans">
                 2
               </span>
-              Wynik
+              {STRINGS.resultTitle[lang]}
             </h2>
           </div>
 
@@ -600,10 +609,9 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
                 <div className="w-24 h-24 bg-muted/30 rounded-full flex items-center justify-center mb-6">
                   <CheckCircle size={40} className="text-muted-foreground/40" />
                 </div>
-                <h3 className="text-2xl font-serif font-medium mb-3 text-muted-foreground/70">Oczekiwanie na pracę</h3>
+                <h3 className="text-2xl font-serif font-medium mb-3 text-muted-foreground/70">{STRINGS.resultEmptyTitle[lang]}</h3>
                 <p className="text-muted-foreground/60 max-w-md leading-relaxed">
-                  Tutaj pojawi się szczegółowa analiza Twojej pracy, zawierająca ocenę punktową, listę błędów oraz
-                  sugestie poprawek.
+                  {STRINGS.resultEmptyDesc[lang]}
                 </p>
               </motion.div>
             ) : (
@@ -619,7 +627,7 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
                   <div className="flex justify-between items-start mb-8 border-b border-border pb-6">
                     <div>
                       <p className="text-sm text-muted-foreground uppercase tracking-widest font-bold mb-2">
-                        Wynik Maturalny
+                        {STRINGS.resultScoreLabel[lang]}
                       </p>
                       <div className="flex items-baseline gap-3">
                         <span className="text-7xl font-serif font-bold text-primary" data-testid="text-score">
@@ -645,23 +653,23 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
                   <div className="mb-8">
                     <GradingRow
                       number="1."
-                      label="Spełnienie formalnych warunków polecenia"
+                      label={STRINGS.critFormal[lang]}
                       score={result.criteria.formalRequirements.points}
                       maxScore={1}
                     >
                       <div className="grid grid-cols-2 gap-2 w-full">
                         {[
                           {
-                            label: "Błąd kardynalny",
+                            label: STRINGS.critFormalCardError[lang],
                             active: result.criteria.formalRequirements.reasons.cardinalError,
                           },
-                          { label: "Brak lektury", active: result.criteria.formalRequirements.reasons.missingReading },
+                          { label: STRINGS.critFormalMissingRead[lang], active: result.criteria.formalRequirements.reasons.missingReading },
                           {
-                            label: "Nie dotyczy problemu",
+                            label: STRINGS.critFormalIrrelevant[lang],
                             active: result.criteria.formalRequirements.reasons.irrelevant,
                           },
                           {
-                            label: "Brak argumentacji",
+                            label: STRINGS.critFormalNoArg[lang],
                             active: result.criteria.formalRequirements.reasons.notArgumentative,
                           },
                         ].map((item, i) => (
@@ -682,74 +690,74 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
 
                     <GradingRow
                       number="2."
-                      label="Kompetencje literackie i kulturowe"
+                      label={STRINGS.critLit[lang]}
                       score={result.criteria.literaryCompetencies.points}
                       maxScore={result.criteria.literaryCompetencies.maxPoints}
-                      errorLabel="Błędy rzeczowe"
+                      errorLabel={STRINGS.critLitErr[lang]}
                       errorCount={result.criteria.literaryCompetencies.factualErrors}
-                      description="Ocena umiejętności wykorzystania utworów literackich i tekstów kultury, funkcjonalności użycia argumentów oraz poprawności rzeczowej."
+                      description={STRINGS.critLitDesc[lang]}
                     />
 
                     <GradingRow
                       number="3a"
-                      label="Struktura wypowiedzi"
+                      label={STRINGS.critStruct[lang]}
                       score={result.criteria.structure.points}
                       maxScore={result.criteria.structure.maxPoints}
-                      description="Ocena spójności, logiki wywodu oraz poprawności kompozycyjnej tekstu (wstęp, rozwinięcie, zakończenie)."
+                      description={STRINGS.critStructDesc[lang]}
                     />
 
                     <GradingRow
                       number="3b"
-                      label="Spójność wypowiedzi"
+                      label={STRINGS.critCohere[lang]}
                       score={result.criteria.coherence.points}
                       maxScore={result.criteria.coherence.maxPoints}
-                      errorLabel="Błędy spójności"
+                      errorLabel={STRINGS.critCohereErr[lang]}
                       errorCount={result.criteria.coherence.coherenceErrors}
-                      description="Ocena spójności wewnątrz zdaniowej i międzyzdaniowej oraz spójności międzyakapitowej."
+                      description={STRINGS.critCohereDesc[lang]}
                     />
 
                     <GradingRow
                       number="3c"
-                      label="Styl wypowiedzi"
+                      label={STRINGS.critStyle[lang]}
                       score={result.criteria.style.points}
                       maxScore={result.criteria.style.maxPoints}
-                      description="Ocena stosowności stylu do gatunku wypowiedzi (rozprawka problemowa)."
+                      description={STRINGS.critStyleDesc[lang]}
                     />
 
                     <GradingRow
                       number="4a"
-                      label="Zakres i poprawność środków językowych"
+                      label={STRINGS.critLang[lang]}
                       score={result.criteria.language.points}
                       maxScore={result.criteria.language.maxPoints}
-                      errorLabel="Błędy językowe"
+                      errorLabel={STRINGS.critLangErr[lang]}
                       errorCount={result.criteria.language.languageErrors}
-                      description="Ocena poprawności leksykalnej, fleksyjnej, słowotwórczej i składniowej oraz zróżnicowania słownictwa i struktur składniowych."
+                      description={STRINGS.critLangDesc[lang]}
                     />
 
                     <GradingRow
                       number="4b"
-                      label="Poprawność ortograficzna"
+                      label={STRINGS.critSpell[lang]}
                       score={result.criteria.spelling.points}
                       maxScore={result.criteria.spelling.maxPoints}
-                      errorLabel="Błędy ortograficzne"
+                      errorLabel={STRINGS.critSpellErr[lang]}
                       errorCount={result.criteria.spelling.spellingErrors}
-                      description="Ocena poprawności zapisu wyrazów zgodnie z zasadami ortografii."
+                      description={STRINGS.critSpellDesc[lang]}
                     />
 
                     <GradingRow
                       number="4c"
-                      label="Poprawność interpunkcyjna"
+                      label={STRINGS.critPunct[lang]}
                       score={result.criteria.punctuation.points}
                       maxScore={result.criteria.punctuation.maxPoints}
-                      errorLabel="Błędy interpunkcyjne"
+                      errorLabel={STRINGS.critPunctErr[lang]}
                       errorCount={result.criteria.punctuation.punctuationErrors}
-                      description="Ocena poprawności stosowania znaków przestankowych."
+                      description={STRINGS.critPunctDesc[lang]}
                     />
                   </div>
 
                   <div className="mb-8 border-t border-border/60 pt-6">
                     <h4 className="font-semibold mb-3 flex items-center gap-2 text-primary">
-                      <PenTool size={18} className="text-accent" /> Komentarz egzaminatora
+                      <PenTool size={18} className="text-accent" /> {STRINGS.resultFeedbackTitle[lang]}
                     </h4>
                     <p
                       className="text-primary/80 italic leading-relaxed border-l-4 border-accent/40 pl-6 py-2 bg-accent/5 rounded-r-lg"
@@ -762,7 +770,7 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
                   <div className="grid grid-cols-1 gap-6 mb-8">
                     <div className="space-y-3">
                       <h4 className="font-semibold text-destructive flex items-center gap-2 text-sm uppercase tracking-wide">
-                        <AlertCircle size={16} /> Do poprawy
+                        <AlertCircle size={16} /> {STRINGS.resultErrorsTitle[lang]}
                       </h4>
                       <ul className="space-y-3" data-testid="list-errors">
                         {result.errors.map((err, i) => (
@@ -780,7 +788,7 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
 
                     <div className="space-y-3">
                       <h4 className="font-semibold text-green-600 flex items-center gap-2 text-sm uppercase tracking-wide">
-                        <CheckCircle size={16} /> Sugestie rozwoju
+                        <CheckCircle size={16} /> {STRINGS.resultSuggestionsTitle[lang]}
                       </h4>
                       <ul className="space-y-3" data-testid="list-suggestions">
                         {result.suggestions.map((sugg, i) => (
@@ -804,13 +812,13 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
                       data-testid="button-share"
                     >
                       {copied ? <Check className="mr-2 h-5 w-5" /> : <Share2 className="mr-2 h-5 w-5" />}
-                      {copied ? "Skopiowano!" : "Udostępnij wynik"}
+                      {copied ? STRINGS.buttonCopied[lang] : STRINGS.buttonShare[lang]}
                     </Button>
                     <Button
                       variant="outline"
                       className="px-4 h-12 border-primary/20"
                       onClick={() =>
-                        toast({ title: "Funkcja niedostępna", description: "Pobieranie PDF będzie dostępne wkrótce." })
+                        toast({ title: STRINGS.toastFeatureUnavailable[lang], description: STRINGS.toastDownloadSoon[lang] })
                       }
                       data-testid="button-download"
                     >

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { HistoryChrome } from "./HistoryChrome";
+import { STRINGS, Lang } from "@/lib/strings";
 
 const MAX_SCORE = 35;
 
@@ -53,6 +54,8 @@ type Submissions = ReturnType<typeof usePreloadedQuery<typeof api.submissions.ge
 
 function HistoryClientContent({ submissions }: { submissions: Submissions }) {
   const router = useRouter();
+  const lang: Lang = (process.env.NEXT_PUBLIC_DEMO_LANG as Lang) === "en" ? "en" : "pl";
+  const locale = lang === "en" ? "en-US" : "pl-PL";
 
   // Filter to only completed submissions
   const completedSubmissions = useMemo(() => {
@@ -74,8 +77,8 @@ function HistoryClientContent({ submissions }: { submissions: Submissions }) {
   const formatDateTime = (timestamp: number) => {
     const date = new Date(timestamp);
     return {
-      date: date.toLocaleDateString("pl-PL", { day: "2-digit", month: "2-digit", year: "numeric" }),
-      time: date.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
+      date: date.toLocaleDateString(locale, { day: "2-digit", month: "2-digit", year: "numeric" }),
+      time: date.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }),
     };
   };
 
@@ -93,20 +96,20 @@ function HistoryClientContent({ submissions }: { submissions: Submissions }) {
     <HistoryChrome>
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-3xl md:text-4xl font-serif font-bold text-primary mb-2">Historia wyników</h1>
-            <p className="text-muted-foreground">Przegląd Twoich dotychczasowych prac i postępów</p>
+            <h1 className="text-3xl md:text-4xl font-serif font-bold text-primary mb-2">{STRINGS.historyTitle[lang]}</h1>
+            <p className="text-muted-foreground">{STRINGS.historySubtitle[lang]}</p>
           </div>
 
           <div className="bg-white px-4 py-2 rounded-lg border border-border shadow-sm flex gap-6 text-sm">
             <div className="flex flex-col">
-              <span className="text-muted-foreground text-xs uppercase tracking-wider">Średnia</span>
+              <span className="text-muted-foreground text-xs uppercase tracking-wider">{STRINGS.historyLabelAverage[lang]}</span>
               <span className="font-bold text-lg text-primary">
                 {stats.average.toFixed(1)} <span className="text-xs font-normal text-muted-foreground">/ {MAX_SCORE}</span>
               </span>
             </div>
             <div className="w-px bg-border" />
             <div className="flex flex-col">
-              <span className="text-muted-foreground text-xs uppercase tracking-wider">Prac</span>
+              <span className="text-muted-foreground text-xs uppercase tracking-wider">{STRINGS.historyLabelCount[lang]}</span>
               <span className="font-bold text-lg text-primary">{stats.count}</span>
             </div>
           </div>
@@ -120,12 +123,12 @@ function HistoryClientContent({ submissions }: { submissions: Submissions }) {
             <div className="w-20 h-20 rounded-full bg-muted/30 flex items-center justify-center mb-6">
               <History className="h-10 w-10 text-muted-foreground/40" />
             </div>
-            <h3 className="text-xl font-serif font-medium text-muted-foreground/70 mb-2">Brak wyników</h3>
+            <h3 className="text-xl font-serif font-medium text-muted-foreground/70 mb-2">{STRINGS.historyEmptyTitle[lang]}</h3>
             <p className="text-muted-foreground/60 max-w-md">
-              Nie masz jeszcze żadnych ocenionych prac. Wróć na stronę główną i prześlij swoją pierwszą rozprawkę.
+              {STRINGS.historyEmptyDesc[lang]}
             </p>
             <Link href="/" className="mt-6">
-              <Button>Oceń pierwszą pracę</Button>
+              <Button>{STRINGS.historyEmptyButton[lang]}</Button>
             </Link>
           </div>
         )}
@@ -155,10 +158,10 @@ function HistoryClientContent({ submissions }: { submissions: Submissions }) {
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <h3 className="font-serif font-bold text-lg text-primary group-hover:text-accent transition-colors">
-                            Rozprawka
+                            {STRINGS.historyEssayType[lang]}
                           </h3>
                           <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground hidden md:inline-block">
-                            {score} pkt
+                            {score} {STRINGS.historyPts[lang]}
                           </span>
                         </div>
                         <p className="text-sm text-muted-foreground line-clamp-1 max-w-md">{getPreview(item.text)}</p>

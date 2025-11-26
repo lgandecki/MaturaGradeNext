@@ -2,8 +2,11 @@
 import { Globe, Linkedin, Twitter } from "lucide-react";
 import { Card } from "@/app/components/ui/card";
 import { Header } from "@/app/components/Header";
+import { STRINGS, Lang } from "@/lib/strings";
 
 export default function About() {
+  const lang: Lang = (process.env.NEXT_PUBLIC_DEMO_LANG as Lang) === "en" ? "en" : "pl";
+
   return (
     <div className="min-h-screen p-4 md:p-8 flex flex-col items-center max-w-3xl mx-auto relative">
       {/* Background decoration */}
@@ -16,13 +19,11 @@ export default function About() {
         <div className="absolute -top-6 -right-6 w-32 h-32 bg-accent/10 rounded-full blur-2xl pointer-events-none" />
 
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-serif font-bold text-primary mb-4">O projekcie</h1>
+          <h1 className="text-3xl md:text-4xl font-serif font-bold text-primary mb-4">{STRINGS.aboutTitle[lang]}</h1>
           <div className="w-16 h-1 bg-accent mb-6" />
 
           <p className="text-lg text-muted-foreground leading-relaxed mb-8 font-serif">
-            &quot;Z Polaka&quot; to narzędzie wspomagane sztuczną inteligencją, stworzone, aby pomóc maturzystom w
-            przygotowaniach do egzaminu dojrzałości. Naszym celem jest zapewnienie szybkiej, rzetelnej i konstruktywnej
-            informacji zwrotnej.
+            {STRINGS.aboutDescription[lang]}
           </p>
 
           <div className="bg-secondary/20 p-6 rounded-xl border border-secondary">
@@ -73,7 +74,7 @@ export default function About() {
         </div>
 
         <div className="text-center text-sm text-muted-foreground/60 font-serif italic">
-          &copy; {new Date().getFullYear()} Z Polaka. Wszystkie prawa zastrzeżone.
+          &copy; {new Date().getFullYear()} {STRINGS.mainTitle[lang]}. {STRINGS.aboutCopyright[lang]}
         </div>
       </Card>
     </div>
