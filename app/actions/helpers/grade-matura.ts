@@ -20,15 +20,18 @@ export const gradeMatura = async (text: string): Promise<{ gradingResult: Server
     system: guardialSystemPrompt,
     prompt: text,
   });
+  console.log("check", check);
   if (check.pass) {
+    console.log("check passed, running with gemini-3-pro-preview");
     const { object } = await generateObject({
-      model: google("gemini-3.0-pro"),
+      model: google("gemini-3-pro-preview"),
       schema: z.object({
         gradingResult: returnGradingSchema(),
       }),
       system: `${gradingSystemPrompt}\n${officialGrading}`,
       prompt: "Oceń poniższe wypracowanie: " + text,
     });
+    console.log("object", object);
     return object;
   }
 
