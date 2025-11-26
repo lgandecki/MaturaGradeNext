@@ -5,11 +5,13 @@ export const create = mutation({
   args: {
     text: v.string(),
     sessionId: v.string(),
+    userId: v.optional(v.string()), // Clerk user ID
   },
   handler: async (ctx, args) => {
     const submissionId = await ctx.db.insert("submissions", {
       text: args.text,
       sessionId: args.sessionId,
+      userId: args.userId,
       status: "pending",
       createdAt: Date.now(),
     });
@@ -119,7 +121,7 @@ export const getBySession = query({
 });
 
 export const getByUser = query({
-  args: { userId: v.id("users") },
+  args: { userId: v.string() },
   handler: async (ctx, { userId }) => {
     return ctx.db
       .query("submissions")
@@ -132,7 +134,7 @@ export const getByUser = query({
 export const claimSubmissions = mutation({
   args: {
     sessionId: v.string(),
-    userId: v.id("users"),
+    userId: v.string(), // Clerk user ID
   },
   handler: async (ctx, { sessionId, userId }) => {
     const submissions = await ctx.db
@@ -140,10 +142,15 @@ export const claimSubmissions = mutation({
       .withIndex("by_sessionId", (q) => q.eq("sessionId", sessionId))
       .collect();
 
+    let claimedCount = 0;
     for (const submission of submissions) {
-      await ctx.db.patch(submission._id, { userId });
+      // Only claim if not already claimed by another user
+      if (!submission.userId) {
+        await ctx.db.patch(submission._id, { userId });
+        claimedCount++;
+      }
     }
 
-    return submissions.length;
+    return claimedCount;
   },
 });

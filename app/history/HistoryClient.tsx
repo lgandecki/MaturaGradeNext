@@ -9,32 +9,39 @@ import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { Header } from "@/app/components/Header";
+import { HistoryChrome } from "./HistoryChrome";
 
 const MAX_SCORE = 35;
 
+// Both queries return the same type, so we can use either
+type PreloadedSubmissions =
+  | Preloaded<typeof api.submissions.getBySession>
+  | Preloaded<typeof api.submissions.getByUser>;
+
 interface HistoryClientProps {
   sessionId: string | null;
-  preloadedSubmissions: Preloaded<typeof api.submissions.getBySession> | null;
+  userId: string | null;
+  preloadedSubmissions: PreloadedSubmissions | null;
 }
 
 // Wrapper for preloaded data
 function HistoryClientWithPreload({
   preloadedSubmissions,
 }: {
-  preloadedSubmissions: Preloaded<typeof api.submissions.getBySession>;
+  preloadedSubmissions: PreloadedSubmissions;
 }) {
-  const submissions = usePreloadedQuery(preloadedSubmissions);
+  // Both queries return the same submission array type
+  const submissions = usePreloadedQuery(preloadedSubmissions as Preloaded<typeof api.submissions.getBySession>);
   return <HistoryClientContent submissions={submissions} />;
 }
 
-// Wrapper for no data (no session)
+// Wrapper for no data (no session/user)
 function HistoryClientEmpty() {
   return <HistoryClientContent submissions={null} />;
 }
 
 // Main export
-export default function HistoryClient({ sessionId, preloadedSubmissions }: HistoryClientProps) {
+export default function HistoryClient({ sessionId, userId, preloadedSubmissions }: HistoryClientProps) {
   if (preloadedSubmissions) {
     return <HistoryClientWithPreload preloadedSubmissions={preloadedSubmissions} />;
   }
@@ -83,14 +90,8 @@ function HistoryClientContent({ submissions }: { submissions: Submissions }) {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-8 flex flex-col items-center max-w-5xl mx-auto relative">
-      {/* Background decoration */}
-      <div className="fixed inset-0 pointer-events-none opacity-30 z-[-1] bg-[radial-gradient(circle_at_50%_120%,rgba(212,175,55,0.15),transparent_50%)]" />
-
-      <Header />
-
-      <div className="w-full mb-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+    <HistoryChrome>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
           <div>
             <h1 className="text-3xl md:text-4xl font-serif font-bold text-primary mb-2">Historia wyników</h1>
             <p className="text-muted-foreground">Przegląd Twoich dotychczasowych prac i postępów</p>
@@ -216,7 +217,6 @@ function HistoryClientContent({ submissions }: { submissions: Submissions }) {
             })}
           </div>
         )}
-      </div>
-    </div>
+    </HistoryChrome>
   );
 }

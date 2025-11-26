@@ -5,14 +5,7 @@ import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { SignInButton, SignOutButton, UserButton } from "@clerk/nextjs";
 import { PenTool, History, Info, Menu, LogOut, User } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetClose,
-} from "@/app/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/app/components/ui/sheet";
 
 export function Header() {
   return (
@@ -22,18 +15,14 @@ export function Header() {
           <PenTool size={24} strokeWidth={1.5} />
         </div>
         <div>
-          <h1 className="text-2xl font-serif font-bold tracking-tight text-primary">
-            Z Polaka
-          </h1>
-          <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">
-            AI Assistant
-          </p>
+          <h1 className="text-2xl font-serif font-bold tracking-tight text-primary">Z Polaka</h1>
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">AI Assistant</p>
         </div>
       </Link>
 
       {/* Desktop navigation */}
-      <div className="hidden sm:flex gap-4">
-        <Link href="/history">
+      <div className="hidden sm:flex gap-4 items-center">
+        <Link href="/history" prefetch={true}>
           <Button
             variant="ghost"
             className="font-serif italic hover:bg-transparent hover:text-accent transition-colors"
@@ -52,62 +41,71 @@ export function Header() {
             O projekcie
           </Button>
         </Link>
-        <div className="w-[100px] flex justify-center">
+        <div className="w-[100px] flex justify-center items-center">
           <Authenticated>
-            <UserButton
-              appearance={{
-                elements: {
-                  userButtonTrigger: {
-                    outline: "none",
-                    boxShadow: "none",
-                    border: "none",
-                    "&:focus": {
+            <div className="animate-in fade-in duration-300 flex items-center">
+              <UserButton
+                appearance={{
+                  elements: {
+                    userButtonTrigger: {
+                      outline: "none",
+                      boxShadow: "none",
+                      border: "none",
+                      "&:focus": {
+                        outline: "none",
+                        boxShadow: "none",
+                      },
+                      "&:focus-visible": {
+                        outline: "none",
+                        boxShadow: "none",
+                      },
+                      "&:active": {
+                        outline: "none",
+                        boxShadow: "none",
+                      },
+                    },
+                    avatarBox: {
+                      outline: "none",
+                      boxShadow: "none",
+                      border: "none",
+                    },
+                    userButtonAvatarBox: {
+                      outline: "none",
+                      boxShadow: "none",
+                      border: "none",
+                    },
+                    userButtonPopoverCard: {
+                      outline: "none",
+                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                    },
+                    rootBox: {
                       outline: "none",
                       boxShadow: "none",
                     },
-                    "&:focus-visible": {
-                      outline: "none",
-                      boxShadow: "none",
-                    },
-                    "&:active": {
-                      outline: "none",
-                      boxShadow: "none",
-                    },
                   },
-                  avatarBox: {
-                    outline: "none",
-                    boxShadow: "none",
-                    border: "none",
-                  },
-                  userButtonAvatarBox: {
-                    outline: "none",
-                    boxShadow: "none",
-                    border: "none",
-                  },
-                  userButtonPopoverCard: {
-                    outline: "none",
-                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                  },
-                  rootBox: {
-                    outline: "none",
-                    boxShadow: "none",
-                  },
-                },
-              }}
-            />
+                }}
+              />
+            </div>
           </Authenticated>
           <Unauthenticated>
-            <SignInButton>
-              <Button
-                variant="ghost"
-                className="font-serif italic hover:bg-transparent hover:text-accent transition-colors"
-              >
-                Zaloguj się
-              </Button>
-            </SignInButton>
+            <div className="animate-in fade-in duration-500">
+              <SignInButton>
+                <Button
+                  variant="ghost"
+                  className="font-serif italic hover:bg-transparent hover:text-accent transition-colors"
+                >
+                  Zaloguj się
+                </Button>
+              </SignInButton>
+            </div>
           </Unauthenticated>
           <AuthLoading>
-            <div className="h-9 w-20 bg-muted/50 rounded animate-pulse" />
+            <Button
+              variant="ghost"
+              className="font-serif italic hover:bg-transparent hover:text-accent transition-colors"
+            >
+              Autoryzacja...
+            </Button>
           </AuthLoading>
         </div>
       </div>
@@ -142,43 +140,46 @@ export function Header() {
                     variant="ghost"
                     className="w-full justify-start font-serif italic hover:bg-transparent hover:text-accent transition-colors"
                   >
-                    <Info className="mr-2 h-4 w-4" />
-                    O projekcie
+                    <Info className="mr-2 h-4 w-4" />O projekcie
                   </Button>
                 </Link>
               </SheetClose>
               <div className="border-t border-border my-2" />
               <Authenticated>
-                <SheetClose asChild>
-                  <Link href="/user">
+                <div className="animate-in fade-in duration-300 flex flex-col gap-4">
+                  <SheetClose asChild>
+                    <Link href="/user">
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start font-serif italic hover:bg-transparent hover:text-accent transition-colors"
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        Moje konto
+                      </Button>
+                    </Link>
+                  </SheetClose>
+                  <SignOutButton>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start font-serif italic hover:bg-transparent hover:text-accent transition-colors text-muted-foreground"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Wyloguj się
+                    </Button>
+                  </SignOutButton>
+                </div>
+              </Authenticated>
+              <Unauthenticated>
+                <div className="animate-in fade-in duration-300">
+                  <SignInButton>
                     <Button
                       variant="ghost"
                       className="w-full justify-start font-serif italic hover:bg-transparent hover:text-accent transition-colors"
                     >
-                      <User className="mr-2 h-4 w-4" />
-                      Moje konto
+                      Zaloguj się
                     </Button>
-                  </Link>
-                </SheetClose>
-                <SignOutButton>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start font-serif italic hover:bg-transparent hover:text-accent transition-colors text-muted-foreground"
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Wyloguj się
-                  </Button>
-                </SignOutButton>
-              </Authenticated>
-              <Unauthenticated>
-                <SignInButton>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start font-serif italic hover:bg-transparent hover:text-accent transition-colors"
-                  >
-                    Zaloguj się
-                  </Button>
-                </SignInButton>
+                  </SignInButton>
+                </div>
               </Unauthenticated>
               <AuthLoading>
                 <div className="h-9 w-24 bg-muted/50 rounded animate-pulse" />

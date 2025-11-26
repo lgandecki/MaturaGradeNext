@@ -15,6 +15,7 @@ export async function getSessionIdFromCookie(): Promise<string | null> {
 /**
  * READ + SET - for Server Actions only
  * Creates new sessionId if doesn't exist
+ * Always re-sets the cookie to ensure httpOnly: false (for client-side claiming)
  */
 export async function getOrCreateSessionId(): Promise<string> {
   const cookieStore = await cookies();
@@ -22,14 +23,17 @@ export async function getOrCreateSessionId(): Promise<string> {
 
   if (!sessionId) {
     sessionId = crypto.randomUUID();
-    cookieStore.set(SESSION_COOKIE_NAME, sessionId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: SESSION_COOKIE_MAX_AGE,
-      path: "/",
-    });
   }
+
+  // Always set the cookie to ensure it's accessible client-side
+  // This also migrates old httpOnly cookies to the new format
+  cookieStore.set(SESSION_COOKIE_NAME, sessionId, {
+    httpOnly: false, // Allow client-side access for claiming submissions
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: SESSION_COOKIE_MAX_AGE,
+    path: "/",
+  });
 
   return sessionId;
 }

@@ -8,7 +8,7 @@ export default defineSchema({
 
     // Ownership
     sessionId: v.optional(v.string()), // UUID for anonymous users
-    userId: v.optional(v.id("users")), // For logged-in users
+    userId: v.optional(v.string()), // Clerk user ID for logged-in users
 
     // Status
     status: v.union(
