@@ -22,7 +22,7 @@ export const gradeMatura = async (text: string): Promise<{ gradingResult: Server
   });
   if (check.pass) {
     const { object } = await generateObject({
-      model: google("gemini-2.5-flash-lite"),
+      model: google("gemini-3.0-pro"),
       schema: z.object({
         gradingResult: returnGradingSchema(),
       }),
