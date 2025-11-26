@@ -9,6 +9,7 @@ import { mockResult } from "./mockResult";
 const google = getCloudflareGatewayGoogleModel();
 export const gradeMatura = async (text: string): Promise<{ gradingResult: ServerGradingResult }> => {
   if (process.env.NODE_ENV === "development") {
+    await new Promise((resolve) => setTimeout(resolve, 30000));
     return { gradingResult: mockResult };
   }
   const { object: check } = await generateObject({

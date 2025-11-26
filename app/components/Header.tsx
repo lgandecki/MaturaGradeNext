@@ -89,7 +89,7 @@ export function Header() {
           </Authenticated>
           <Unauthenticated>
             <div className="animate-in fade-in duration-500">
-              <SignInButton>
+              <SignInButton mode="modal">
                 <Button
                   variant="ghost"
                   className="font-serif italic hover:bg-transparent hover:text-accent transition-colors"

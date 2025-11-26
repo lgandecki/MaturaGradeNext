@@ -18,8 +18,10 @@ import {
   ChevronDown,
   PenTool,
   Info,
+  User,
 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
+import { SignUpButton, useUser } from "@clerk/nextjs";
 import { Button } from "@/app/components/ui/button";
 import { Card } from "@/app/components/ui/card";
 import { Textarea } from "@/app/components/ui/textarea";
@@ -149,14 +151,10 @@ export interface HomeContentProps {
   onReset: () => void;
 }
 
-export function HomeContent({
-  submission,
-  sessionId,
-  onSubmissionCreated,
-  onReset,
-}: HomeContentProps) {
+export function HomeContent({ submission, sessionId, onSubmissionCreated, onReset }: HomeContentProps) {
   const { executeAsync } = useAction(gradeMaturaAction);
   const router = useRouter();
+  const { isSignedIn, isLoaded: isAuthLoaded } = useUser();
 
   // Derive isGrading from submission status
   const isGrading = useMemo(() => {
@@ -177,6 +175,7 @@ export function HomeContent({
   const [progress, setProgress] = useState(0);
   const [estimatedTime, setEstimatedTime] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const { toast } = useToast();
 
   const onDrop = useCallback(
@@ -292,6 +291,13 @@ export function HomeContent({
     }
   }, [submission?.status, submission?.result, submission?.error, submission?.text, toast, text, onReset]);
 
+  // Close sign-up tracking when user signs in
+  useEffect(() => {
+    if (isSignedIn) {
+      setIsSignUpOpen(false);
+    }
+  }, [isSignedIn]);
+
   const handleReset = () => {
     setText("");
     setResult(null);
@@ -320,7 +326,7 @@ export function HomeContent({
       {/* Background decoration */}
       <div className="fixed inset-0 pointer-events-none opacity-30 z-[-1] bg-[radial-gradient(circle_at_50%_120%,rgba(212,175,55,0.15),transparent_50%)]" />
 
-      <Dialog open={isSubmitting || isGrading} onOpenChange={() => {}}>
+      <Dialog open={(isSubmitting || isGrading) && !isSignUpOpen} onOpenChange={() => {}}>
         <DialogContent
           className="sm:max-w-md"
           onPointerDownOutside={(e) => e.preventDefault()}
@@ -351,6 +357,27 @@ export function HomeContent({
                 <p className="text-xs">Prosimy o cierpliwość. Dokładna analiza wymaga czasu.</p>
               </div>
             </div>
+
+            {isAuthLoaded && !isSignedIn && (
+              <div className="bg-accent/10 rounded-lg p-4 text-sm flex items-start gap-3 border border-accent/20">
+                <User className="h-5 w-5 shrink-0 text-accent mt-0.5" />
+                <div className="space-y-2">
+                  <p className="font-medium text-primary/80">Załóż konto, aby zapisać wyniki</p>
+                  <p className="text-xs text-muted-foreground">
+                    Po rejestracji będziesz mieć dostęp do historii swoich prac z dowolnego urządzenia.
+                  </p>
+                  <SignUpButton
+                    mode="modal"
+                    forceRedirectUrl={submission ? `/submission/${submission._id}` : "/"}
+                    fallbackRedirectUrl={submission ? `/submission/${submission._id}` : "/"}
+                  >
+                    <Button size="sm" variant="outline" className="mt-1" onClick={() => setIsSignUpOpen(true)}>
+                      Załóż konto
+                    </Button>
+                  </SignUpButton>
+                </div>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -551,11 +578,7 @@ export function HomeContent({
         </motion.div>
 
         {/* Results Section */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="relative z-0"
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative z-0">
           <div className="flex justify-between items-center px-1 mb-4">
             <h2 className="text-xl font-serif font-medium flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-sans">
