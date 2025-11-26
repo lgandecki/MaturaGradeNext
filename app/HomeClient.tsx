@@ -5,7 +5,7 @@ import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQuery, usePreloadedQuery, Preloaded } from "convex/react";
+import { useQuery, usePreloadedQuery, Preloaded, Authenticated, Unauthenticated } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import {
@@ -35,6 +35,8 @@ import { gradeMaturaAction } from "./actions/grade-matura-action";
 import { serverGradingToUi } from "./serverGradingToUi";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./components/ui/dialog";
 import { Progress } from "./components/ui/progress";
+import { SignInButton } from "@clerk/nextjs";
+import { UserButton } from "@clerk/nextjs";
 
 export const gradingResultSchema = z.object({
   totalScore: z.number(),
@@ -210,9 +212,7 @@ function HomeClientWithPreload({
   preloadedSubmission: Preloaded<typeof api.submissions.get>;
 }) {
   // Start with the id that came from the URL / server
-  const [activeSubmissionId, setActiveSubmissionId] = useState<Id<"submissions"> | null>(
-    submissionId
-  );
+  const [activeSubmissionId, setActiveSubmissionId] = useState<Id<"submissions"> | null>(submissionId);
 
   // 1. Preloaded SSR result for the initial id
   const preloaded = usePreloadedQuery(preloadedSubmission);
@@ -220,9 +220,7 @@ function HomeClientWithPreload({
   // 2. Live Convex query for when we switch to a *different* id
   const liveSubmission = useQuery(
     api.submissions.get,
-    activeSubmissionId && activeSubmissionId !== submissionId
-      ? { id: activeSubmissionId }
-      : "skip" // don't open an extra subscription for the initial id
+    activeSubmissionId && activeSubmissionId !== submissionId ? { id: activeSubmissionId } : "skip" // don't open an extra subscription for the initial id
   );
 
   // 3. Decide which submission to expose to the content component
@@ -254,10 +252,7 @@ function HomeClientWithQuery({
   // Track submission ID locally so we can update it without server re-render
   const [activeSubmissionId, setActiveSubmissionId] = useState(initialSubmissionId);
 
-  const submission = useQuery(
-    api.submissions.get,
-    activeSubmissionId ? { id: activeSubmissionId } : "skip"
-  );
+  const submission = useQuery(api.submissions.get, activeSubmissionId ? { id: activeSubmissionId } : "skip");
   return (
     <HomeClientContent
       submissionId={activeSubmissionId}
@@ -599,6 +594,12 @@ function HomeClientContent({
               O projekcie
             </Button>
           </Link>
+          <Authenticated>
+            <UserButton />
+          </Authenticated>
+          <Unauthenticated>
+            <SignInButton />
+          </Unauthenticated>
         </div>
       </header>
 
@@ -802,10 +803,19 @@ function HomeClientContent({
                     >
                       <div className="grid grid-cols-2 gap-2 w-full">
                         {[
-                          { label: "Błąd kardynalny", active: result.criteria.formalRequirements.reasons.cardinalError },
+                          {
+                            label: "Błąd kardynalny",
+                            active: result.criteria.formalRequirements.reasons.cardinalError,
+                          },
                           { label: "Brak lektury", active: result.criteria.formalRequirements.reasons.missingReading },
-                          { label: "Nie dotyczy problemu", active: result.criteria.formalRequirements.reasons.irrelevant },
-                          { label: "Brak argumentacji", active: result.criteria.formalRequirements.reasons.notArgumentative },
+                          {
+                            label: "Nie dotyczy problemu",
+                            active: result.criteria.formalRequirements.reasons.irrelevant,
+                          },
+                          {
+                            label: "Brak argumentacji",
+                            active: result.criteria.formalRequirements.reasons.notArgumentative,
+                          },
                         ].map((item, i) => (
                           <div
                             key={i}
