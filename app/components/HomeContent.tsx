@@ -427,8 +427,8 @@ export function HomeContent({
       <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
         {/* Input Section */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           className={cn(
             "flex flex-col gap-4 relative z-0",
             result && "lg:sticky lg:top-8 lg:self-start lg:h-[calc(100vh-4rem)]"
@@ -551,7 +551,11 @@ export function HomeContent({
         </motion.div>
 
         {/* Results Section */}
-        <div className="relative z-0">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="relative z-0"
+        >
           <div className="flex justify-between items-center px-1 mb-4">
             <h2 className="text-xl font-serif font-medium flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-sans">
@@ -794,7 +798,7 @@ export function HomeContent({
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
