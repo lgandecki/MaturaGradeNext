@@ -79,7 +79,7 @@ function HistoryClientContent({ submissions }: { submissions: Submissions }) {
   };
 
   const handleSubmissionClick = (submissionId: string) => {
-    router.push(`/?submission=${submissionId}`);
+    router.push(`/submission/${submissionId}`);
   };
 
   return (
