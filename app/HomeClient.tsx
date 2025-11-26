@@ -5,7 +5,7 @@ import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQuery, usePreloadedQuery, Preloaded, Authenticated, Unauthenticated } from "convex/react";
+import { useQuery, usePreloadedQuery, Preloaded, Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import {
@@ -594,59 +594,64 @@ function HomeClientContent({
               O projekcie
             </Button>
           </Link>
-          <Authenticated>
-            <UserButton
-              appearance={{
-                elements: {
-                  userButtonTrigger: {
-                    outline: "none",
-                    boxShadow: "none",
-                    border: "none",
-                    "&:focus": {
+          <div className="w-[100px] flex justify-center">
+            <Authenticated>
+              <UserButton
+                appearance={{
+                  elements: {
+                    userButtonTrigger: {
+                      outline: "none",
+                      boxShadow: "none",
+                      border: "none",
+                      "&:focus": {
+                        outline: "none",
+                        boxShadow: "none",
+                      },
+                      "&:focus-visible": {
+                        outline: "none",
+                        boxShadow: "none",
+                      },
+                      "&:active": {
+                        outline: "none",
+                        boxShadow: "none",
+                      },
+                    },
+                    avatarBox: {
+                      outline: "none",
+                      boxShadow: "none",
+                      border: "none",
+                    },
+                    userButtonAvatarBox: {
+                      outline: "none",
+                      boxShadow: "none",
+                      border: "none",
+                    },
+                    userButtonPopoverCard: {
+                      outline: "none",
+                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                    },
+                    rootBox: {
                       outline: "none",
                       boxShadow: "none",
                     },
-                    "&:focus-visible": {
-                      outline: "none",
-                      boxShadow: "none",
-                    },
-                    "&:active": {
-                      outline: "none",
-                      boxShadow: "none",
-                    },
                   },
-                  avatarBox: {
-                    outline: "none",
-                    boxShadow: "none",
-                    border: "none",
-                  },
-                  userButtonAvatarBox: {
-                    outline: "none",
-                    boxShadow: "none",
-                    border: "none",
-                  },
-                  userButtonPopoverCard: {
-                    outline: "none",
-                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                  },
-                  rootBox: {
-                    outline: "none",
-                    boxShadow: "none",
-                  },
-                },
-              }}
-            />
-          </Authenticated>
-          <Unauthenticated>
-            <SignInButton>
-              <Button
-                variant="ghost"
-                className="font-serif italic hover:bg-transparent hover:text-accent transition-colors"
-              >
-                Zaloguj się
-              </Button>
-            </SignInButton>
-          </Unauthenticated>
+                }}
+              />
+            </Authenticated>
+            <Unauthenticated>
+              <SignInButton>
+                <Button
+                  variant="ghost"
+                  className="font-serif italic hover:bg-transparent hover:text-accent transition-colors"
+                >
+                  Zaloguj się
+                </Button>
+              </SignInButton>
+            </Unauthenticated>
+            <AuthLoading>
+              <div className="h-9 w-20 bg-muted/50 rounded animate-pulse" />
+            </AuthLoading>
+          </div>
         </div>
       </header>
 
