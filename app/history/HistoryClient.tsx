@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { ArrowLeft, History, FileText, Calendar, Clock } from "lucide-react";
+import { History, FileText, Calendar, Clock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { usePreloadedQuery, Preloaded } from "convex/react";
@@ -9,6 +9,7 @@ import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { Header } from "@/app/components/Header";
 
 const MAX_SCORE = 35;
 
@@ -86,17 +87,9 @@ function HistoryClientContent({ submissions }: { submissions: Submissions }) {
       {/* Background decoration */}
       <div className="fixed inset-0 pointer-events-none opacity-30 z-[-1] bg-[radial-gradient(circle_at_50%_120%,rgba(212,175,55,0.15),transparent_50%)]" />
 
-      <div className="w-full mb-8">
-        <Link href="/">
-          <Button
-            variant="ghost"
-            className="pl-0 hover:bg-transparent hover:text-primary/70 text-muted-foreground mb-4"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Powrót do strony głównej
-          </Button>
-        </Link>
+      <Header />
 
+      <div className="w-full mb-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
           <div>
             <h1 className="text-3xl md:text-4xl font-serif font-bold text-primary mb-2">Historia wyników</h1>

@@ -3,9 +3,8 @@ import { useState, useCallback, useEffect, useMemo } from "react";
 import { z } from "zod";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQuery, usePreloadedQuery, Preloaded, Authenticated, Unauthenticated, AuthLoading } from "convex/react";
+import { useQuery, usePreloadedQuery, Preloaded } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import {
@@ -14,7 +13,6 @@ import {
   CheckCircle,
   AlertCircle,
   Share2,
-  PenTool,
   RefreshCcw,
   Copy,
   Check,
@@ -22,7 +20,7 @@ import {
   ArrowLeft,
   Sparkles,
   ChevronDown,
-  History,
+  PenTool,
   Info,
 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
@@ -35,8 +33,7 @@ import { gradeMaturaAction } from "./actions/grade-matura-action";
 import { serverGradingToUi } from "./serverGradingToUi";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./components/ui/dialog";
 import { Progress } from "./components/ui/progress";
-import { SignInButton } from "@clerk/nextjs";
-import { UserButton } from "@clerk/nextjs";
+import { Header } from "./components/Header";
 
 export const gradingResultSchema = z.object({
   totalScore: z.number(),
@@ -564,96 +561,7 @@ function HomeClientContent({
         )}
       </AnimatePresence>
 
-      <header className="w-full flex justify-between items-center mb-12 mt-4 z-10">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-primary text-primary-foreground rounded-xl flex items-center justify-center shadow-lg transform rotate-3">
-            <PenTool size={24} strokeWidth={1.5} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-serif font-bold tracking-tight text-primary">Z Polaka</h1>
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">AI Assistant</p>
-          </div>
-        </div>
-        <div className="flex gap-4">
-          <Link href="/history">
-            <Button
-              variant="ghost"
-              className="font-serif italic hover:bg-transparent hover:text-accent transition-colors hidden sm:flex"
-              data-testid="button-history"
-            >
-              <History className="mr-2 h-4 w-4" />
-              Historia
-            </Button>
-          </Link>
-          <Link href="/about">
-            <Button
-              variant="ghost"
-              className="font-serif italic hover:bg-transparent hover:text-accent transition-colors"
-              data-testid="button-about"
-            >
-              O projekcie
-            </Button>
-          </Link>
-          <div className="w-[100px] flex justify-center">
-            <Authenticated>
-              <UserButton
-                appearance={{
-                  elements: {
-                    userButtonTrigger: {
-                      outline: "none",
-                      boxShadow: "none",
-                      border: "none",
-                      "&:focus": {
-                        outline: "none",
-                        boxShadow: "none",
-                      },
-                      "&:focus-visible": {
-                        outline: "none",
-                        boxShadow: "none",
-                      },
-                      "&:active": {
-                        outline: "none",
-                        boxShadow: "none",
-                      },
-                    },
-                    avatarBox: {
-                      outline: "none",
-                      boxShadow: "none",
-                      border: "none",
-                    },
-                    userButtonAvatarBox: {
-                      outline: "none",
-                      boxShadow: "none",
-                      border: "none",
-                    },
-                    userButtonPopoverCard: {
-                      outline: "none",
-                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                    },
-                    rootBox: {
-                      outline: "none",
-                      boxShadow: "none",
-                    },
-                  },
-                }}
-              />
-            </Authenticated>
-            <Unauthenticated>
-              <SignInButton>
-                <Button
-                  variant="ghost"
-                  className="font-serif italic hover:bg-transparent hover:text-accent transition-colors"
-                >
-                  Zaloguj się
-                </Button>
-              </SignInButton>
-            </Unauthenticated>
-            <AuthLoading>
-              <div className="h-9 w-20 bg-muted/50 rounded animate-pulse" />
-            </AuthLoading>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
         {/* Input Section */}
