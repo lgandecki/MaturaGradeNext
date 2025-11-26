@@ -4,9 +4,13 @@ import officialGrading from "./prompts/official-grading.md";
 import gradingSystemPrompt from "./prompts/grading-system-prompt.md";
 import guardialSystemPrompt from "./prompts/guardial-system-prompt.md";
 import { getCloudflareGatewayGoogleModel } from "./getCloudflareGatewayGoogleModel";
+import { mockResult } from "./mockResult";
 
 const google = getCloudflareGatewayGoogleModel();
-export const gradeMatura = async (text: string) => {
+export const gradeMatura = async (text: string): Promise<{ gradingResult: ServerGradingResult }> => {
+  if (process.env.NODE_ENV === "development") {
+    return { gradingResult: mockResult };
+  }
   const { object: check } = await generateObject({
     model: google("gemini-2.5-flash-lite"),
     schema: z.object({
