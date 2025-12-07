@@ -35,7 +35,7 @@ export const gradeMatura = async (text: string): Promise<{ gradingResult: Server
     return object;
   }
 
-  throw new Error("Invalid input");
+  throw new Error("INVALID_INPUT");
 };
 
 export function returnGradingSchema() {

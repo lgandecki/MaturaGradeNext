@@ -126,6 +126,14 @@ export const STRINGS = {
     pl: "Wystąpił błąd podczas oceny pracy.",
     en: "An error occurred while grading the essay.",
   },
+  toastInvalidInputTitle: {
+    pl: "To nie wygląda na rozprawkę",
+    en: "This doesn't look like an essay",
+  },
+  toastInvalidInputDesc: {
+    pl: "Prześlij tekst rozprawki, analizy literackiej lub pracy maturalnej. Spróbuj ponownie z właściwą treścią!",
+    en: "Please submit an essay, literary analysis, or exam paper. Try again with proper content!",
+  },
   toastCopyTitle: {
     pl: "Skopiowano do schowka",
     en: "Copied to clipboard",

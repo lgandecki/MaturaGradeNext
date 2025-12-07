@@ -284,9 +284,10 @@ export function HomeContent({ submission, sessionId, onSubmissionCreated, onRese
     }
 
     if (submission.status === "failed") {
+      const isInvalidInput = submission.error === "INVALID_INPUT";
       toast({
-        title: STRINGS.toastErrorTitle[lang],
-        description: submission.error || STRINGS.toastErrorDesc[lang],
+        title: isInvalidInput ? STRINGS.toastInvalidInputTitle[lang] : STRINGS.toastErrorTitle[lang],
+        description: isInvalidInput ? STRINGS.toastInvalidInputDesc[lang] : STRINGS.toastErrorDesc[lang],
         variant: "destructive",
       });
       onReset();
